@@ -1,0 +1,42 @@
+apiVersion: apps/v1 # we are using deployment set creation beacuse pod is subset of replica set and replica set is subset of delopyment set.
+kind: Deployment
+metadata:
+  name: mongodb
+  namespace: roboshop
+  labels: # these labels are deployment labels
+    app: mongodb
+    project: roboshop
+    tier: db
+spec:
+  replicas: 1
+  selector:
+    matchLabels: # these labels are used to find the pods
+      app: mongodb
+      project: roboshop
+      tier: db
+  template:
+    metadata: #pod creation start
+      labels: # these labels are pod labels
+        app: mongodb
+        project: roboshop
+        tier: db
+    spec:
+      containers:
+      - name: mongodb
+        image: joindevops/mongodb:v1
+        imagePullPolicy: Always # imagepully policy has to be mentioned, if not it will not get updated if the image is rebuild
+---
+apiVersion: v1 # using cluster ip service creation because mongodb need not be exposed to outside world.
+kind: Service
+metadata:
+  name: mongodb
+  namespace: roboshop
+spec:
+  selector:
+    app: mongodb
+    project: roboshop
+    tier: db
+  ports:
+  - protocol: TCP
+    port: 27017 #service-port
+    targetPort: 27017 #container-port
