@@ -1,41 +1,51 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: catalogue
+  namespace: roboshop
+data:
+  MONGO: "true"
 apiVersion: apps/v1 # we are using deployment set creation beacuse pod is subset of replica set and replica set is subset of delopyment set.
 kind: Deployment
 metadata:
-  name: mongodb
+  name: catalogue
   namespace: roboshop
   labels: # these labels are deployment labels
-    app: mongodb
+    app: catalogue
     project: roboshop
-    tier: db
+    tier: app
 spec:
   replicas: 1
   selector:
     matchLabels: # these labels are used to find the pods
-      app: mongodb
+      app: catalogue
       project: roboshop
-      tier: db
+      tier: app
   template:
     metadata: #pod creation start
       labels: # these labels are pod labels
-        app: mongodb
+        app: catalogue
         project: roboshop
-        tier: db
+        tier: app
     spec:
       containers:
-      - name: mongodb
-        image: mynameispa1/mongodb:v1
+      - name: catalogue
+        image: mynameispa1/catalogue:v1
         imagePullPolicy: Always # imagepully policy has to be mentioned, if not it will not get updated if the image is rebuild
+        envFrom:
+        - configMapRef:
+            name: catalogue
 ---
-apiVersion: v1 # using cluster ip service creation because mongodb need not be exposed to outside world.
+apiVersion: v1 # using cluster ip service creation because catalogue need not be exposed to outside world.
 kind: Service
 metadata:
-  name: mongodb
+  name: catalogue
   namespace: roboshop
 spec:
   selector:
-    app: mongodb
+    app: catalogue
     project: roboshop
-    tier: db
+    tier: app
   ports:
   - protocol: TCP
     port: 27017 #service-port
