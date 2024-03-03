@@ -1,0 +1,55 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: shipping
+  namespace: roboshop
+data:
+  ENV CART_ENDPOINT: "cart:8080"
+  ENV DB_HOST: mysql
+---  
+apiVersion: apps/v1 # we are using deployment set creation beacuse pod is subset of replica set and replica set is subset of delopyment set.
+kind: Deployment
+metadata:
+  name: shipping
+  namespace: roboshop
+  labels: # these labels are deployment labels
+    app: shipping
+    project: roboshop
+    tier: app
+spec:
+  replicas: 1
+  selector:
+    matchLabels: # these labels are used to find the pods
+      app: shipping
+      project: roboshop
+      tier: app
+  template:
+    metadata: #pod creation start
+      labels: # these labels are pod labels
+        app: shipping
+        project: roboshop
+        tier: app
+    spec:
+      containers:
+      - name: shipping
+        image: mynameispa1/shipping:v1
+        imagePullPolicy: Always # imagepully policy has to be mentioned, if not it will not get updated if the image is rebuild
+        envFrom:
+        - configMapRef:
+            name: shipping
+---
+# Services creation Hear we are using cluster ip service
+apiVersion: v1 # using cluster ip service creation because shipping need not be exposed to outside world.
+kind: Service
+metadata:
+  name: shipping
+  namespace: roboshop
+spec:
+  selector:
+    app: shipping
+    project: roboshop
+    tier: app
+  ports:
+  - protocol: TCP
+    port: 8080 #service-port
+    targetPort: 8080 #container-port
