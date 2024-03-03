@@ -4,8 +4,8 @@ metadata:
   name: shipping
   namespace: roboshop
 data:
-  ENV CART_ENDPOINT: "cart:8080"
-  ENV DB_HOST: mysql
+  CART_ENDPOINT: "cart:8080"
+  DB_HOST: mysql
 ---  
 apiVersion: apps/v1 # we are using deployment set creation beacuse pod is subset of replica set and replica set is subset of delopyment set.
 kind: Deployment
