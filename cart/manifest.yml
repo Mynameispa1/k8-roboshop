@@ -1,0 +1,56 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: cart
+  namespace: roboshop
+data:
+  REDIS_HOST: "redis"
+  CATALOGUE_HOST: "catalogue"
+  CATALOGUE_PORT: "8080"
+---  
+apiVersion: apps/v1 # we are using deployment set creation beacuse pod is subset of replica set and replica set is subset of delopyment set.
+kind: Deployment
+metadata:
+  name: cart
+  namespace: roboshop
+  labels: # these labels are deployment labels
+    app: cart
+    project: roboshop
+    tier: app
+spec:
+  replicas: 1
+  selector:
+    matchLabels: # these labels are used to find the pods
+      app: cart
+      project: roboshop
+      tier: app
+  template:
+    metadata: #pod creation start
+      labels: # these labels are pod labels
+        app: cart
+        project: roboshop
+        tier: app
+    spec:
+      containers:
+      - name: cart
+        image: mynameispa1/cart:v1
+        imagePullPolicy: Always # imagepully policy has to be mentioned, if not it will not get updated if the image is rebuild
+        envFrom:
+        - configMapRef:
+            name: cart
+---
+# Services creation Hear we are using cluster ip service
+apiVersion: v1 # using cluster ip service creation because cart need not be exposed to outside world.
+kind: Service
+metadata:
+  name: cart
+  namespace: roboshop
+spec:
+  selector:
+    app: cart
+    project: roboshop
+    tier: app
+  ports:
+  - protocol: TCP
+    port: 8080 #service-port
+    targetPort: 8080 #container-port
