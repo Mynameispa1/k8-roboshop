@@ -5,6 +5,7 @@ metadata:
   namespace: roboshop
 data:
   MONGO: "true"
+---  
 apiVersion: apps/v1 # we are using deployment set creation beacuse pod is subset of replica set and replica set is subset of delopyment set.
 kind: Deployment
 metadata:
@@ -48,5 +49,5 @@ spec:
     tier: app
   ports:
   - protocol: TCP
-    port: 27017 #service-port
-    targetPort: 27017 #container-port
+    port: 8080 #service-port
+    targetPort: 8080 #container-port
