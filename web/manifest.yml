@@ -1,0 +1,48 @@
+---  
+apiVersion: apps/v1 # we are using deployment set creation beacuse pod is subset of replica set and replica set is subset of delopyment set.
+kind: Deployment
+metadata:
+  name: web
+  namespace: roboshop
+  labels: # these labels are deployment labels
+    app: web
+    project: roboshop
+    tier: web
+spec:
+  replicas: 1
+  selector:
+    matchLabels: # these labels are used to find the pods
+      app: web
+      project: roboshop
+      tier: web
+  template:
+    metadata: #pod creation start
+      labels: # these labels are pod labels
+        app: web
+        project: roboshop
+        tier: web
+    spec:
+      containers:
+      - name: web
+        image: mynameispa1/web:v1
+        imagePullPolicy: Always # imagepully policy has to be mentioned, if not it will not get updated if the image is rebuild
+        # envFrom:
+        # - configMapRef:
+        #     name: web
+---
+# Services creation Hear we are using cluster ip service
+apiVersion: v1 # using cluster ip service creation because web need not be exposed to outside world.
+kind: Service
+metadata:
+  name: web
+  namespace: roboshop
+spec:
+  type: LoadBalancer
+  selector:
+    app: web
+    project: roboshop
+    tier: web
+  ports:
+  - protocol: TCP
+    port: 80 #service-port
+    targetPort: 80 #container-port
