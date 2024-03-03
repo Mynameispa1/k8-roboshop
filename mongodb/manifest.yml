@@ -26,7 +26,8 @@ spec:
         image: mynameispa1/mongodb:v1
         imagePullPolicy: Always # imagepully policy has to be mentioned, if not it will not get updated if the image is rebuild
 ---
-apiVersion: v1 # using cluster ip service creation because mongodb need not be exposed to outside world.
+# Assinging Services
+apiVersion: v1 # using cluster ip service creation because mongodb need not to be exposed to outside world.
 kind: Service
 metadata:
   name: mongodb

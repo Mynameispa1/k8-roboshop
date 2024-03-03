@@ -37,6 +37,7 @@ spec:
         - configMapRef:
             name: catalogue
 ---
+# Services creation Hear we are using cluster ip service
 apiVersion: v1 # using cluster ip service creation because catalogue need not be exposed to outside world.
 kind: Service
 metadata:
