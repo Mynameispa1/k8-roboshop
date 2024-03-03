@@ -1,0 +1,67 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: mysql
+  namespace: roboshop
+data:
+  MYSQL_DATABASE: cities 
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: mysql
+  namespace: roboshop
+type: Opaque  
+data:
+  MYSQL_ROOT_PASSWORD: Um9ib1Nob3BAMQ==
+  MYSQL_USER: c2hpcHBpbmc=
+  MYSQL_PASSWORD: Um9ib1Nob3BAMQ==
+---  
+apiVersion: apps/v1 # we are using deployment set creation beacuse pod is subset of replica set and replica set is subset of delopyment set.
+kind: Deployment
+metadata:
+  name: mysql
+  namespace: roboshop
+  labels: # these labels are deployment labels
+    app: mysql
+    project: roboshop
+    tier: db
+spec:
+  replicas: 1
+  selector:
+    matchLabels: # these labels are used to find the pods
+      app: mysql
+      project: roboshop
+      tier: db
+  template:
+    metadata: #pod creation start
+      labels: # these labels are pod labels
+        app: mysql
+        project: roboshop
+        tier: db
+    spec:
+      containers: 
+      - name: mysql
+        image: mynameispa1/mysql:v1
+        imagePullPolicy: Always # imagepully policy has to be mentioned, if not it will not get updated if the image is rebuild
+        envFrom:
+        - configMapRef:
+            name: mysql
+        - secretRef:
+            name: mysql  
+---
+# Assinging Services
+apiVersion: v1 # using cluster ip service creation because mysql need not to be exposed to outside world.
+kind: Service
+metadata:
+  name: mysql
+  namespace: roboshop
+spec:
+  selector:
+    app: mysql
+    project: roboshop
+    tier: db
+  ports:
+  - protocol: TCP
+    port: 3306  #service-port
+    targetPort: 3306 #container-port
