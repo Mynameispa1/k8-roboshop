@@ -1,0 +1,43 @@
+apiVersion: apps/v1 # we are using deployment set creation beacuse pod is subset of replica set and replica set is subset of delopyment set.
+kind: Deployment
+metadata:
+  name: redis
+  namespace: roboshop
+  labels: # these labels are deployment labels
+    app: redis
+    project: roboshop
+    tier: db
+spec:
+  replicas: 1
+  selector:
+    matchLabels: # these labels are used to find the pods
+      app: redis
+      project: roboshop
+      tier: db
+  template:
+    metadata: #pod creation start
+      labels: # these labels are pod labels
+        app: redis
+        project: roboshop
+        tier: db
+    spec:
+      containers:
+      - name: redis
+        image: redis
+        imagePullPolicy: Always # imagepully policy has to be mentioned, if not it will not get updated if the image is rebuild
+---
+# Assinging Services
+apiVersion: v1 # using cluster ip service creation because redis need not to be exposed to outside world.
+kind: Service
+metadata:
+  name: redis
+  namespace: roboshop
+spec:
+  selector:
+    app: redis
+    project: roboshop
+    tier: db
+  ports:
+  - protocol: TCP
+    port: 6379 #service-port
+    targetPort: 6379 #container-port
